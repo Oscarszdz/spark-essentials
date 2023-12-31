@@ -124,10 +124,22 @@ object DataFramesBasics extends App {
   )
 
 
-//  val smartphoneDF = spark.createDataFrame(smartphone)
-  val smartphoneDF = spark.createDataFrame(smarthphoneSchema)
+  val smartphoneDF = spark.createDataFrame(smartphone)
   smartphoneDF.printSchema()
   smartphoneDF.show()
 
+  val smartphoneDF_2 = smartphone.toDF("Make", "Model", "Screen_dimension", "Camera")
+//  smartphoneDF_2.printSchema()
+  smartphoneDF_2.show()
+
+//  2) Read another file from the /data folder (movies.json)
+  val moviesDF = spark.read
+    .format("json")
+    .option("inferSchema", "true")
+    .load("src/main/resources/data/movies.json")
+
+  moviesDF.printSchema()
+  moviesDF.select("Title").show()
+  println(s"The movies DF has ${moviesDF.count()} rows.")
 
 }
