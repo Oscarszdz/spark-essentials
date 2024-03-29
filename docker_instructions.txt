@@ -1,0 +1,14 @@
+# in IdeaProjects/spark-essentials
+ps -axu | grep postgres
+
+# Check for postgres id and kiil it
+sudo kill xxxx
+
+# then
+sudo docker-compose up
+
+# once "database system is ready to accept connections", open another terminal and do:
+sudo ./psql.sh
+
+# go to spark-cluster directory and do:
+sudo ./build-images.sh
