@@ -144,6 +144,15 @@ object ColumnsAndExpressions extends App {
   )
   sumProfitColumn2.show(3, truncate = false)
 
+//  option c)
+  val sumProfitColumn3 = moviesOsdDF.select(
+    "Title",
+    "US_Gross",
+    "Worldwide_Gross"
+  ).withColumn("Total_Gross", col("US_Gross") + col("Worldwide_Gross"))
+
+  sumProfitColumn3.show(1, truncate = false)
+
 ////  3. Select all COMEDY movies with IMDB rating above 6.
 //  option a)
   moviesOsdDF.filter(col("Major_Genre") === "Comedy" and col("IMDB_Rating") > 6).show(2, truncate = false)
@@ -155,4 +164,14 @@ object ColumnsAndExpressions extends App {
   //  option b)
   moviesOsdDF.filter("Major_Genre = 'Comedy' and IMDB_Rating > 6").show(5, truncate = false)
 
+//  option c)
+  moviesOsdDF.select("Title", "IMDB_Rating")
+    .where(col("Major_Genre") === "Comedy" and col("IMDB_Rating") > 6).show(2, truncate = false)
+
+  // option d)
+  moviesOsdDF.select("Title", "IMDB_Rating")
+    .where(col("Major_Genre") === "Comedy")
+    .where(col("IMDB_Rating") > 6)
+    .sort(desc("IMDB_Rating"))
+    .show(25, truncate = false)
 }
