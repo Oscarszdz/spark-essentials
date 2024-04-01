@@ -1,14 +1,21 @@
-# in IdeaProjects/spark-essentials
+# Do the following to check if postgres is running:
 ps -axu | grep postgres
 
 # Check for postgres id and kiil it
 sudo kill xxxx
 
-# then
-sudo docker-compose up
+# in IdeaProjects/spark-essentials (where we downloaded the repository for this course and do the following), execute the next:
+docker-compose up
 
-# once "database system is ready to accept connections", open another terminal and do:
-sudo ./psql.sh
+# once "database system is ready to accept connections", open another terminalo, go to IdeaProjects/spark-essentials, then execute:
+./psql.sh
 
-# go to spark-cluster directory and do:
-sudo ./build-images.sh
+# open another terminal and go to IdeaProjects/spark-essentials/spark-cluster directory, then execute the next:
+make build-images.sh executable by doing:
+chmod +x build-images.sh
+
+then execute:
+./build-images.sh
+
+# after done that, execute the next command in IdeaProjects/spark-essentials/spark-cluster:
+docker-compose up --scale spark-worker=3

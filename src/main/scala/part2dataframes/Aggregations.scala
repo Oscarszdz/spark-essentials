@@ -35,7 +35,79 @@ object Aggregations extends App {
 
   moviesDF.selectExpr("min(IMDB_Rating)").show()
 
-  // avg
-  moviesDF.select(avg(col("Rotten_Tomatoes_Rating")))
+  // Avg
+  moviesDF.select(avg(col("Rotten_Tomatoes_Rating")).as("Average_Rotten_Tomatoes_Rating")).show()
+  moviesDF.selectExpr("avg(Rotten_Tomatoes_Rating)").show()
 
+  // Data science
+  moviesDF.select(
+    mean(col("Rotten_Tomatoes_Rating")),
+    stddev(col("Rotten_Tomatoes_Rating"))
+  ).show()
+
+  // Grouping
+  val countByGenreDF = moviesDF
+    .groupBy(col("Major_Genre"))  // include nulls
+    .count()  // select count(*) from moviesDF group by Major_Genre, SQL code equivalent
+//  countByGenreDF.show()
+
+  val avgRatingByGenreDF = moviesDF
+    .groupBy(col("Major_Genre"))
+    .avg("IMDB_Rating")
+
+  avgRatingByGenreDF.show(25, truncate = false)
+
+  val aggregationsByGenreDF = moviesDF
+    .groupBy(col("Major_Genre"))
+    .agg(
+      count(col("*")).as("N_Movies"),
+      avg(col("IMDB_Rating")).as("Avg_Rating")
+    )
+    .orderBy(col("Avg_Rating"))
+
+  aggregationsByGenreDF.show()
+
+
+  /*
+  * Exercises
+  *
+  * 1. Sum up ALL the profits of ALL the movies in the DF
+  * 2. Count how many distinct directors we have
+  * 3. Show the mean and standard deviations of US gross revenue for the movies
+  * 4. Compute the average IMDB rating and the average US gross revenue PER DIRECTOR (sort)
+  */
+
+//  1. Sum up ALL the profits of ALL the movies in the DF
+  moviesDF.show(1, truncate = false)
+  val profitsMoviesDF = moviesDF
+    .select(
+      (col("US_Gross") + col("Worldwide_Gross") + col("US_DVD_Sales")).as("Total_Profits")
+    )
+    .select(sum("Total_Profits"))
+
+  profitsMoviesDF.show(25, truncate = false)
+
+//  2. Count how many distinct directors we have
+  val distinctDirectorsDF = moviesDF.select(countDistinct(col("Director")))
+  distinctDirectorsDF.show(50, truncate = false)
+
+//  3. Show the mean and standard deviations of US gross revenue for the movies
+  val statisticMoviesDF = moviesDF.select(
+    mean("US_Gross"),
+    stddev("US_Gross")
+  )
+
+  statisticMoviesDF.show(10, truncate = false)
+
+//  4. Compute the average IMDB rating and the average US gross revenue PER DIRECTOR (sort)
+    val statisticsMoviesDF2  = moviesDF
+    .groupBy("Director")
+    .agg(
+      avg("IMDB_Rating").as("Avg_IMDB_Rating"),
+      avg("US_Gross").as("Avg_US_Gross"),
+      sum("US_Gross").as("Total_Gross")
+    )
+      .orderBy(col("Avg_IMDB_Rating").desc_nulls_last, col("Total_Gross").desc_nulls_last)
+
+  statisticsMoviesDF2.show(10, truncate = false)
 }
