@@ -61,11 +61,52 @@ object CommonTypes extends App {
 //  carsDF.show(5, truncate = false)
 
   // capitalization: initacap, lower, upper
-  carsDF.select(initcap(col("Name"))).show(20, truncate = false)
+  carsDF.select(initcap(col("Name")))
+//    .show(20, truncate = false)
 
   // Contains (it is possible to chain multiple filters)
   carsDF.select("*").where(col("Name").contains("volkswagen"))
+//    .show(5, truncate = false)
 
   // regex (this is the more powerful version of .contains)
+  val regexString = "volkswagen|vw"
 
-}
+  val vwDF = carsDF.select(
+    col("Name"),
+    regexp_extract(col("Name"), regexString, 0).as("regex_extract")
+  ).where(col("regex_extract") =!= "").drop("regex_extract")
+
+//  vwDF
+//    .show(5, truncate = false)
+
+  vwDF.select(
+    col("Name"),
+    regexp_replace(col("Name"), regexString, "People's Car").as("regex_replace")
+  )
+//    .show(5, truncate = false)
+
+  /*
+  * Exercise
+  *
+  * Filter the cars DF by a list of car names obtained by an API call*/
+
+  def getCarNames: List[String] = List("Volkswagen", "Mercedes-Benz", "Ford")
+
+  // version 1 - regex
+  val complexRegex = getCarNames.map(_.toLowerCase()).mkString("|")  // volkswagen|mercedes-benz|ford
+
+  carsDF.select(
+    col("Name"),
+    regexp_extract(col("Name"), complexRegex, 0).as("regex_extract")
+  ).where(col("regex_extract") =!= "")
+    .drop("regex_extract")
+//    .show(25, truncate = false)
+
+  // version 2 - contains
+  val carNameFilters = getCarNames.map(_.toLowerCase()).map(name => col("Name").contains(name))
+  val bigFilter = carNameFilters.fold(lit(false))((combinedFilter, newCarNameFilter) => combinedFilter or newCarNameFilter)
+
+//  carsDF.filter(bigFilter).show(25, truncate = false)
+
+
+  }
