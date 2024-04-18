@@ -92,5 +92,41 @@ object Datasets extends App {
   carsDS.select(avg(col("Horsepower"))).show()
 
   // Joins
+  case class Guitar(id: Long, make: String, model: String, guitarType: String)
+  case class GuitarPlayer(id: Long, name: String, guitars: Seq[Long], band: Long)
+  case class Band(id: Long, name: String, hometown: String, year: Long)
+
+  val guitarsDS = readDF("guitars.json").as[Guitar]
+  val guitarPlayersDS = readDF("guitarPlayers.json").as[GuitarPlayer]
+  val bandsDS = readDF("bands.json").as[Band]
+
+  val guitarPlayerBandsDS: Dataset[(GuitarPlayer, Band)] = guitarPlayersDS.joinWith(bandsDS, guitarPlayersDS.col("band") === bandsDS.col("id"), "inner")
+  guitarPlayerBandsDS
+//    .show(5, truncate = false)
+
+  /*Note
+  * Cannot up cast `id` from bigint to int as it may truncate
+  * When we do .option("inferSchema", "true") Spark will read all the numbers as longs (big int = Long)*/
+
+   /*
+   * Exercise: join the guitarDS and guitarPlayersDS, in an outer join
+   * (hint: use array_contains)
+  */
+
+  val guitarsPlayersDS: Dataset[(GuitarPlayer, Guitar)] = guitarPlayersDS
+    .joinWith(guitarsDS, array_contains(guitarPlayersDS.col("guitars"), guitarsDS.col("id")), "outer")
+
+  guitarsPlayersDS
+//    .show(5, truncate = false)
+
+  // GroupingCars
+
+  val carsGroupByOrigin = carsDS
+    .groupByKey(_.Origin)
+    .count()
+    .show()
+
+  // joins and groups are WIDE transformations, will involve SHUFFLE operations
+  // Be careful when using joins and groups for performance
 
 }
